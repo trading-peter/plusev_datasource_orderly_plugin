@@ -89,6 +89,22 @@ type KlineResponse struct {
 	} `json:"data"`
 }
 
+type ClientInfoResponse struct {
+	Success   bool  `json:"success"`
+	Timestamp int64 `json:"timestamp"`
+	Data      struct {
+		AccountID   string  `json:"account_id"`
+		Email       string  `json:"email"`
+		AccountMode string  `json:"account_mode"`
+		MaxLeverage float64 `json:"max_leverage"`
+
+		MaintenanceCancelOrders bool           `json:"maintenance_cancel_orders"`
+		ImrFactor               map[string]any `json:"imr_factor"`
+		MaxNotional             map[string]any `json:"max_notional"`
+		Extra                   map[string]any `json:"-"`
+	} `json:"data"`
+}
+
 // PositionsResponse represents the response from GET /v1/positions.
 type PositionsResponse struct {
 	Success   bool  `json:"success"`
@@ -131,6 +147,22 @@ type PositionRow struct {
 	IMRWithdrawOrders     float64 `json:"IMR_withdraw_orders"`
 	MMRWithOrders         float64 `json:"MMR_with_orders"`
 	LastSumUnitaryFunding float64 `json:"last_sum_unitary_funding"`
+}
+
+type HoldingItem struct {
+	UpdatedTime  int64   `json:"updated_time"`
+	Token        string  `json:"token"`
+	Holding      float64 `json:"holding"`
+	Frozen       float64 `json:"frozen"`
+	PendingShort float64 `json:"pending_short"`
+}
+
+type ClientHoldingResponse struct {
+	Success   bool  `json:"success"`
+	Timestamp int64 `json:"timestamp"`
+	Data      struct {
+		Holding []HoldingItem `json:"holding"`
+	} `json:"data"`
 }
 
 // WebSocket message structures
