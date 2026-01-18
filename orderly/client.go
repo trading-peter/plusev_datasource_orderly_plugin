@@ -2,6 +2,7 @@ package orderly
 
 import (
 	"crypto/ed25519"
+	"strings"
 
 	"github.com/plusev-terminal/go-plugin-common/logging"
 	"github.com/plusev-terminal/go-plugin-common/plugin"
@@ -47,12 +48,12 @@ func (c *Client) SetCredentials(creds map[string]string) {
 	}
 
 	if apiKey, ok := creds["apiKey"]; ok {
-		c.apiKey = apiKey
+		c.apiKey = strings.TrimPrefix(apiKey, "ed25519:")
 	}
 
 	if privateKeyStr, ok := creds["privateKey"]; ok {
 		// Decode the private key from base58
-		privateKeySeed, err := base58.Decode(privateKeyStr)
+		privateKeySeed, err := base58.Decode(strings.TrimPrefix(privateKeyStr, "ed25519:"))
 		if err != nil {
 			c.log.ErrorWithData("Failed to decode base58 private key", map[string]any{"error": err})
 			return
