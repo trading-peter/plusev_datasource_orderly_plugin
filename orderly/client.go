@@ -13,15 +13,15 @@ import (
 
 // Client represents a client for the Orderly Network API
 type Client struct {
-	name       string
-	baseURL    string
-	wsBaseURL  string
-	requester  rt.RequestDoer
-	log        *logging.Logger
-	accountID  string             // Orderly Account ID (decrypted)
-	apiKey     string             // API Key (decrypted)
-	privateKey ed25519.PrivateKey // ED25519 Private Key (decrypted)
-	isTestnet  bool
+	name      string
+	baseURL   string
+	wsBaseURL string
+	requester rt.RequestDoer
+	log       *logging.Logger
+	accountID string             // Orderly Account ID (decrypted)
+	apiKey    string             // API Key (decrypted)
+	secretKey ed25519.PrivateKey // ED25519 Private Key (decrypted)
+	isTestnet bool
 }
 
 // NewClient creates a new Orderly API client
@@ -51,25 +51,25 @@ func (c *Client) SetCredentials(creds map[string]string) {
 		c.apiKey = strings.TrimPrefix(apiKey, "ed25519:")
 	}
 
-	if privateKeyStr, ok := creds["privateKey"]; ok {
+	if secretKeyStr, ok := creds["secretKey"]; ok {
 		// Decode the private key from base58
-		privateKeySeed, err := base58.Decode(strings.TrimPrefix(privateKeyStr, "ed25519:"))
+		secretKeySeed, err := base58.Decode(strings.TrimPrefix(secretKeyStr, "ed25519:"))
 		if err != nil {
 			c.log.ErrorWithData("Failed to decode base58 private key", map[string]any{"error": err})
 			return
 		}
 
 		// ED25519 seed is 32 bytes, private key is 64 bytes
-		if len(privateKeySeed) != ed25519.SeedSize {
+		if len(secretKeySeed) != ed25519.SeedSize {
 			c.log.ErrorWithData("Invalid private key seed size", map[string]any{
 				"expected": ed25519.SeedSize,
-				"got":      len(privateKeySeed),
+				"got":      len(secretKeySeed),
 			})
 			return
 		}
 
 		// Generate the full private key from the seed
-		c.privateKey = ed25519.NewKeyFromSeed(privateKeySeed)
+		c.secretKey = ed25519.NewKeyFromSeed(secretKeySeed)
 	}
 }
 
@@ -92,15 +92,15 @@ func (c *Client) GetConfigFields() []plugin.ConfigField {
 			Label:       "API Key",
 			Name:        "apiKey",
 			Description: "Your Orderly Network API Key",
-			Required:    false, // Optional for public data only
+			Required:    false,
 			Encrypt:     true,
 			Mask:        true,
 		},
 		{
-			Label:       "Private Key",
-			Name:        "privateKey",
-			Description: "Your ED25519 private key (base58 encoded)",
-			Required:    false, // Optional for public data only
+			Label:       "Secret Key",
+			Name:        "secretKey",
+			Description: "Your ED25519 secret key",
+			Required:    false,
 			Encrypt:     true,
 			Mask:        true,
 		},

@@ -111,5 +111,5 @@ func (p *OrderlyPlugin) handleGetPositions(params map[string]any) plugin.Respons
 		Extra: map[string]any{},
 	}
 
-	return plugin.SuccessResponse(resp)
+	return plugin.SuccessResponse(resp, time.Second*3)
 }

@@ -15,7 +15,7 @@ import (
 
 // isAuthenticated returns true if the client has authentication credentials
 func (c *Client) isAuthenticated() bool {
-	return c.accountID != "" && c.apiKey != "" && c.privateKey != nil
+	return c.accountID != "" && c.apiKey != "" && c.secretKey != nil
 }
 
 // addAuthHeaders adds Orderly authentication headers to a request
@@ -37,11 +37,11 @@ func (c *Client) addAuthHeaders(req *rt.Request, body string) {
 	messageToSign := fmt.Sprintf("%d%s%s%s", timestamp, req.Method, path, body)
 
 	// Sign with ED25519
-	signature := ed25519.Sign(c.privateKey, []byte(messageToSign))
+	signature := ed25519.Sign(c.secretKey, []byte(messageToSign))
 	signatureBase64 := base64.URLEncoding.EncodeToString(signature)
 
 	// Get the public key from the private key for the orderly-key header
-	publicKey := c.privateKey.Public().(ed25519.PublicKey)
+	publicKey := c.secretKey.Public().(ed25519.PublicKey)
 	publicKeyBase58 := base58.Encode(publicKey)
 	orderlyKey := fmt.Sprintf("ed25519:%s", publicKeyBase58)
 

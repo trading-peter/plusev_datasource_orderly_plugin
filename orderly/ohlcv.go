@@ -129,6 +129,7 @@ func (c *Client) GetOHLCV(params exchange.GetOHLCVParams) ([]tt.OHLCVRecord, err
 			Low:      fmt.Sprintf("%.8f", response.L[i]),
 			Close:    fmt.Sprintf("%.8f", response.C[i]),
 			Volume:   fmt.Sprintf("%.8f", response.V[i]),
+			IsClosed: true,
 		})
 	}
 

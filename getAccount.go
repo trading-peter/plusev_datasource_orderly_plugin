@@ -18,11 +18,13 @@ func (p *OrderlyPlugin) handleGetAccount(params map[string]any) plugin.Response 
 	}
 
 	parsed := ex.GetAccountParamsFromMap(params)
+
 	wantsSpot := true
 	wantsFutures := true
 	if len(parsed.Scopes) > 0 {
 		wantsSpot = false
 		wantsFutures = false
+
 		for _, s := range parsed.Scopes {
 			switch s {
 			case acct.ScopeSpot:
@@ -40,12 +42,14 @@ func (p *OrderlyPlugin) handleGetAccount(params map[string]any) plugin.Response 
 
 	var holdingErr error
 	var holding orderly.ClientHoldingResponse
+
 	if wantsSpot {
 		holding, holdingErr = p.client.GetClientHolding()
 	}
 
 	var posErr error
 	var posResp orderly.PositionsResponse
+
 	if wantsFutures {
 		posResp, posErr = p.client.GetAllPositions()
 	}
@@ -59,6 +63,7 @@ func (p *OrderlyPlugin) handleGetAccount(params map[string]any) plugin.Response 
 		Balances: map[string]acct.AssetBalance{},
 		Extra:    map[string]any{},
 	}
+
 	if holdingErr == nil {
 		for _, h := range holding.Data.Holding {
 			if strings.TrimSpace(h.Token) == "" {
@@ -83,15 +88,18 @@ func (p *OrderlyPlugin) handleGetAccount(params map[string]any) plugin.Response 
 	}
 
 	scopes := map[acct.ScopeType]acct.BalanceScope{}
+
 	if wantsSpot {
 		scopes[acct.ScopeCollateral] = collateralScope
 	}
+
 	if wantsFutures {
 		fScope := acct.BalanceScope{
 			Balances: map[string]acct.AssetBalance{},
 			State:    &acct.ScopeState{},
 			Extra:    map[string]any{},
 		}
+
 		if posErr == nil {
 			fScope.State = &acct.ScopeState{
 				Equity:          fmt.Sprintf("%.15g", posResp.Data.TotalCollateralValue),
@@ -131,5 +139,5 @@ func (p *OrderlyPlugin) handleGetAccount(params map[string]any) plugin.Response 
 		},
 	}
 
-	return plugin.SuccessResponse(acctResp)
+	return plugin.SuccessResponse(acctResp, time.Second*5)
 }

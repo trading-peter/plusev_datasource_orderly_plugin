@@ -1,5 +1,7 @@
 package orderly
 
+import "encoding/json"
+
 const (
 	// OrderlyMaxLimit is the maximum number of candles that can be fetched in a single request
 	OrderlyMaxLimit = 1000
@@ -9,11 +11,10 @@ const (
 
 // OrderlyResponse represents a generic Orderly API response
 type OrderlyResponse struct {
-	Success   bool        `json:"success"`
-	Data      interface{} `json:"data,omitempty"`
-	Code      int         `json:"code,omitempty"`
-	Message   string      `json:"message,omitempty"`
-	Timestamp int64       `json:"timestamp"`
+	Success   bool   `json:"success"`
+	Code      int    `json:"code,omitzero"`
+	Message   string `json:"message,omitzero"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 // Symbol represents an Orderly trading symbol/market
@@ -48,9 +49,8 @@ type Symbol struct {
 
 // SymbolsResponse represents the response from the symbols endpoint
 type SymbolsResponse struct {
-	Success   bool  `json:"success"`
-	Timestamp int64 `json:"timestamp"`
-	Data      struct {
+	OrderlyResponse
+	Data struct {
 		Rows []Symbol `json:"rows"`
 	} `json:"data"`
 }
@@ -82,17 +82,15 @@ type KlineData struct {
 
 // KlineResponse represents the response from the kline endpoint
 type KlineResponse struct {
-	Success   bool  `json:"success"`
-	Timestamp int64 `json:"timestamp"`
-	Data      struct {
+	OrderlyResponse
+	Data struct {
 		Rows []KlineData `json:"rows"`
 	} `json:"data"`
 }
 
 type ClientInfoResponse struct {
-	Success   bool  `json:"success"`
-	Timestamp int64 `json:"timestamp"`
-	Data      struct {
+	OrderlyResponse
+	Data struct {
 		AccountID   string  `json:"account_id"`
 		Email       string  `json:"email"`
 		AccountMode string  `json:"account_mode"`
@@ -107,9 +105,8 @@ type ClientInfoResponse struct {
 
 // PositionsResponse represents the response from GET /v1/positions.
 type PositionsResponse struct {
-	Success   bool  `json:"success"`
-	Timestamp int64 `json:"timestamp"`
-	Data      struct {
+	OrderlyResponse
+	Data struct {
 		CurrentMarginRatioWithOrders     float64       `json:"current_margin_ratio_with_orders"`
 		FreeCollateral                   float64       `json:"free_collateral"`
 		InitialMarginRatio               float64       `json:"initial_margin_ratio"`
@@ -163,6 +160,184 @@ type ClientHoldingResponse struct {
 	Data      struct {
 		Holding []HoldingItem `json:"holding"`
 	} `json:"data"`
+}
+
+// OrdersResponse represents the response from GET /v1/orders.
+type OrdersResponse struct {
+	OrderlyResponse
+	Data struct {
+		Rows []OrderRow `json:"rows"`
+	} `json:"data"`
+}
+
+// OrderRow represents an order in OrdersResponse.Data.Rows.
+// Fields are kept permissive to match Orderly API variations.
+type OrderRow struct {
+	OrderID       StringOrNumber `json:"order_id"`
+	Symbol        string         `json:"symbol"`
+	Side          string         `json:"side"`
+	OrderType     string         `json:"order_type"`
+	Price         float64        `json:"price"`
+	Quantity      float64        `json:"quantity"`
+	ExecutedQty   float64        `json:"executed_qty"`
+	Status        string         `json:"status"`
+	CreatedTime   int64          `json:"created_time"`
+	UpdatedTime   int64          `json:"updated_time"`
+	ClientOrderID string         `json:"client_order_id"`
+}
+
+// AlgoOrdersResponse represents the response from GET /v1/algo/orders.
+type AlgoOrdersResponse struct {
+	OrderlyResponse
+	Data struct {
+		Rows []AlgoOrderRow `json:"rows"`
+	} `json:"data"`
+}
+
+// AlgoOrderRow represents an algo order (STOP, TPSL, BRACKET, etc.).
+type AlgoOrderRow struct {
+	AlgoOrderID           StringOrNumber `json:"algo_order_id"`
+	RootAlgoOrderID       StringOrNumber `json:"root_algo_order_id"`
+	ParentAlgoOrderID     StringOrNumber `json:"parent_algo_order_id"`
+	Symbol                string         `json:"symbol"`
+	Side                  string         `json:"side"`
+	AlgoType              string         `json:"algo_type"`   // STOP, TPSL, TP_SL, BRACKET, etc
+	AlgoStatus            string         `json:"algo_status"` // NEW, CANCELLED, FILLED, etc
+	RootAlgoOrderStatus   string         `json:"root_algo_order_status"`
+	Type                  string         `json:"type"` // LIMIT, MARKET
+	Status                string         `json:"status"`
+	Quantity              float64        `json:"quantity"`
+	ExecutedQuantity      float64        `json:"executed_quantity"`
+	TotalExecutedQuantity float64        `json:"total_executed_quantity"`
+	AverageExecutedPrice  float64        `json:"average_executed_price"`
+	VisibleQuantity       float64        `json:"visible_quantity"`
+	Price                 float64        `json:"price"`
+	TriggerPrice          float64        `json:"trigger_price"`
+	TriggerStatus         string         `json:"trigger_status"`
+	TriggerPriceType      string         `json:"trigger_price_type"` // MARK_PRICE, LAST_PRICE
+	TriggerTime           int64          `json:"trigger_time"`
+	IsTriggered           bool           `json:"is_triggered"`
+	IsActivated           bool           `json:"is_activated"`
+	ReduceOnly            bool           `json:"reduce_only"`
+	TotalFee              float64        `json:"total_fee"`
+	FeeAsset              string         `json:"fee_asset"`
+	RealizedPnl           float64        `json:"realized_pnl"`
+	OrderTag              string         `json:"order_tag"`
+	CreatedTime           int64          `json:"created_time"`
+	UpdatedTime           int64          `json:"updated_time"`
+	ChildOrders           []AlgoOrderRow `json:"child_orders,omitempty"`
+}
+
+// CreateOrderRequest represents the request body for POST /v1/order.
+type CreateOrderRequest struct {
+	Symbol          string   `json:"symbol"`
+	OrderType       string   `json:"order_type"`
+	Side            string   `json:"side"`
+	ClientOrderID   string   `json:"client_order_id,omitempty"`
+	OrderPrice      *float64 `json:"order_price,omitempty"`
+	OrderQuantity   *float64 `json:"order_quantity,omitempty"`
+	OrderAmount     *float64 `json:"order_amount,omitempty"`
+	VisibleQuantity *float64 `json:"visible_quantity,omitempty"`
+	ReduceOnly      bool     `json:"reduce_only,omitempty"`
+	Slippage        *float64 `json:"slippage,omitempty"`
+	OrderTag        string   `json:"order_tag,omitempty"`
+	Level           *int     `json:"level,omitempty"`
+	PostOnlyAdjust  *bool    `json:"post_only_adjust,omitempty"`
+}
+
+// CreateOrderResponse represents the response from POST /v1/order.
+type CreateOrderResponse struct {
+	OrderlyResponse
+	Data CreateOrderData `json:"data"`
+}
+
+// CreateOrderData is the response data for create order endpoints.
+type CreateOrderData struct {
+	OrderID       StringOrNumber `json:"order_id"`
+	ClientOrderID string         `json:"client_order_id"`
+	OrderType     string         `json:"order_type"`
+	OrderPrice    float64        `json:"order_price"`
+	OrderQuantity float64        `json:"order_quantity"`
+	AlgoType      string         `json:"algo_type,omitempty"`
+	ErrorMessage  string         `json:"error_message"`
+}
+
+// CancelResponse represents the response from cancel order endpoints.
+type CancelResponse struct {
+	OrderlyResponse
+	Data struct {
+		Status string `json:"status"`
+	} `json:"data"`
+}
+
+// BatchCreateOrderRequest represents the request body for POST /v1/batch-order.
+type BatchCreateOrderRequest struct {
+	Orders []CreateOrderRequest `json:"orders"`
+}
+
+// BatchCreateOrderResponse represents the response from POST /v1/batch-order.
+type BatchCreateOrderResponse struct {
+	OrderlyResponse
+	Data struct {
+		Rows []CreateOrderData `json:"rows"`
+	} `json:"data"`
+}
+
+// CreateAlgoOrderRequest represents the request body for POST /v1/algo/order.
+type CreateAlgoOrderRequest struct {
+	Symbol           string                   `json:"symbol"`
+	AlgoType         string                   `json:"algo_type"`
+	Type             string                   `json:"type,omitempty"`
+	Quantity         *float64                 `json:"quantity,omitempty"`
+	Side             string                   `json:"side,omitempty"`
+	ClientOrderID    string                   `json:"client_order_id,omitempty"`
+	Price            *float64                 `json:"price,omitempty"`
+	TriggerPriceType string                   `json:"trigger_price_type,omitempty"`
+	TriggerPrice     *float64                 `json:"trigger_price,omitempty"`
+	ReduceOnly       bool                     `json:"reduce_only,omitempty"`
+	VisibleQuantity  *float64                 `json:"visible_quantity,omitempty"`
+	OrderTag         string                   `json:"order_tag,omitempty"`
+	ActivatedPrice   *float64                 `json:"activatedPrice,omitempty"`
+	CallbackRate     string                   `json:"callbackRate,omitempty"`
+	CallbackValue    string                   `json:"callbackValue,omitempty"`
+	ChildOrders      []CreateAlgoOrderRequest `json:"child_orders,omitempty"`
+}
+
+// CreateAlgoOrderResponse represents the response from POST /v1/algo/order.
+type CreateAlgoOrderResponse struct {
+	OrderlyResponse
+	Data struct {
+		OrderID       StringOrNumber `json:"order_id"`
+		ClientOrderID string         `json:"client_order_id"`
+		AlgoType      string         `json:"algo_type"`
+		Quantity      float64        `json:"quantity"`
+	} `json:"data"`
+}
+
+// StringOrNumber unmarshals a JSON string or number and keeps the string form.
+// This is useful for IDs that might be numeric on some exchanges but should be
+// treated as strings across plugins.
+type StringOrNumber string
+
+func (s *StringOrNumber) UnmarshalJSON(b []byte) error {
+	// Try string
+	var str string
+	if err := json.Unmarshal(b, &str); err == nil {
+		*s = StringOrNumber(str)
+		return nil
+	}
+	// Try number; json.Number preserves integer formatting.
+	var num json.Number
+	if err := json.Unmarshal(b, &num); err == nil {
+		*s = StringOrNumber(num.String())
+		return nil
+	}
+	// Try null
+	if string(b) == "null" {
+		*s = ""
+		return nil
+	}
+	return &json.UnmarshalTypeError{Value: string(b), Type: nil}
 }
 
 // WebSocket message structures

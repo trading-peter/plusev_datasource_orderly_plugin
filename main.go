@@ -101,6 +101,12 @@ func (p *OrderlyPlugin) GetRateLimits() []plugin.RateLimit {
 			RPS:     plugin.CalculateRPS(5, 10*time.Second), // 5 requests per 10 seconds as per API docs
 			Burst:   1,
 		},
+		{
+			Command: ex.CMD_CREATE_ORDERS, // POST /v1/order or /v1/batch-order or /v1/algo/order
+			Scope:   []plugin.RateLimitScope{plugin.RateLimitScopeAPIKey},
+			RPS:     1.0, // Conservative (batch create limit is 1 rps)
+			Burst:   2,
+		},
 		// WebSocket streams
 		{
 			Command: ex.CMD_OHLCV_STREAM,
@@ -142,8 +148,8 @@ func (p *OrderlyPlugin) OnInit(config *plugin.ConfigStore) error {
 	if apiKey := config.GetString("apiKey"); apiKey != "" {
 		credentials["apiKey"] = apiKey
 	}
-	if privateKey := config.GetString("privateKey"); privateKey != "" {
-		credentials["privateKey"] = privateKey
+	if secretKey := config.GetString("secretKey"); secretKey != "" {
+		credentials["secretKey"] = secretKey
 	}
 
 	p.client.SetCredentials(credentials)
@@ -166,6 +172,9 @@ func (p *OrderlyPlugin) RegisterCommands(router *plugin.CommandRouter) {
 	router.Register(ex.CMD_GET_ACCOUNT, p.handleGetAccount)
 	router.Register(ex.CMD_GET_BALANCES, p.handleGetBalances)
 	router.Register(ex.CMD_GET_POSITIONS, p.handleGetPositions)
+	router.Register(ex.CMD_GET_ORDERS, p.handleGetOrders)
+	router.Register(ex.CMD_CREATE_ORDERS, p.handleCreateOrders)
+	router.Register(ex.CMD_CANCEL_ORDERS, p.handleCancelOrders)
 	router.Register("getRecentOHLCV", p.handleGetRecentOHLCV)
 }
 

@@ -117,6 +117,8 @@ func (c *Client) HandleStreamMessage(request plugin.StreamMessageRequest) (plugi
 			}
 
 			// Convert to OHLCV record
+			// IsClosed is always false for live updates - Orderly doesn't provide this info,
+			// consumers should use OHLCVDebouncer to detect closed candles
 			record := tt.OHLCVRecord{
 				OpenTime: klineUpdate.Data.StartTime / 1000, // Convert from milliseconds to seconds
 				Open:     fmt.Sprintf("%.8f", klineUpdate.Data.Open),
@@ -124,6 +126,7 @@ func (c *Client) HandleStreamMessage(request plugin.StreamMessageRequest) (plugi
 				Low:      fmt.Sprintf("%.8f", klineUpdate.Data.Low),
 				Close:    fmt.Sprintf("%.8f", klineUpdate.Data.Close),
 				Volume:   fmt.Sprintf("%.8f", klineUpdate.Data.Volume),
+				IsClosed: false,
 			}
 
 			response := plugin.StreamMessageResponse{

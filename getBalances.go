@@ -17,11 +17,13 @@ func (p *OrderlyPlugin) handleGetBalances(params map[string]any) plugin.Response
 	}
 
 	parsed := ex.GetBalancesParamsFromMap(params)
+
 	wantsCollateral := true
 	wantsFutures := true
 	if len(parsed.Scopes) > 0 {
 		wantsCollateral = false
 		wantsFutures = false
+
 		for _, s := range parsed.Scopes {
 			switch s {
 			case acct.ScopeCollateral:
@@ -33,6 +35,7 @@ func (p *OrderlyPlugin) handleGetBalances(params map[string]any) plugin.Response
 	}
 
 	fetchedAt := time.Now()
+
 	resp := acct.BalancesResponse{
 		FetchedAt: fetchedAt,
 		Scopes:    map[acct.ScopeType]acct.BalanceScope{},
@@ -47,7 +50,9 @@ func (p *OrderlyPlugin) handleGetBalances(params map[string]any) plugin.Response
 			if holding.Timestamp > 0 {
 				resp.FetchedAt = time.UnixMilli(holding.Timestamp)
 			}
+
 			scope := acct.BalanceScope{Balances: map[string]acct.AssetBalance{}, Extra: map[string]any{}}
+
 			for _, h := range holding.Data.Holding {
 				asset := strings.ToUpper(strings.TrimSpace(h.Token))
 				if asset == "" {
@@ -78,6 +83,7 @@ func (p *OrderlyPlugin) handleGetBalances(params map[string]any) plugin.Response
 			if pos.Timestamp > 0 && resp.FetchedAt.IsZero() {
 				resp.FetchedAt = time.UnixMilli(pos.Timestamp)
 			}
+
 			resp.Scopes[acct.ScopeFutures] = acct.BalanceScope{
 				Balances: map[string]acct.AssetBalance{},
 				State: &acct.ScopeState{
@@ -98,5 +104,5 @@ func (p *OrderlyPlugin) handleGetBalances(params map[string]any) plugin.Response
 		}
 	}
 
-	return plugin.SuccessResponse(resp)
+	return plugin.SuccessResponse(resp, time.Second*3)
 }

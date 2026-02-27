@@ -9,6 +9,7 @@ A PlusEV data source plugin for Orderly Network, providing access to perpetual f
 - **Real-time Streaming**: WebSocket-based real-time OHLCV data streams
 - **Multiple Timeframes**: Support for 1m, 5m, 15m, 30m, 1h, 4h, 12h, 1d, 1w, 1M
 - **Authentication**: Optional ED25519-based authentication for enhanced rate limits
+- **Order Placement**: Support for batch order creation and algo orders (TP/SL, bracket, trailing stop)
 
 ## Configuration
 
