@@ -22,11 +22,11 @@ func (c *Client) GetMarkets() ([]tt.Market, error) {
 	var response SymbolsResponse
 	_, err := c.requester.Send(req, &response)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch symbols from Orderly: %w", err)
+		return nil, fmt.Errorf("failed to fetch symbols from Orderly code=%d message=%s: %w", response.Code, response.Message, err)
 	}
 
 	if !response.Success {
-		return nil, fmt.Errorf("Orderly API returned success=false")
+		return nil, fmt.Errorf("Orderly API returned success=false code=%d message=%s", response.Code, response.Message)
 	}
 
 	var markets []tt.Market

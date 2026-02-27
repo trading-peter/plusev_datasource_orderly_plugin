@@ -41,7 +41,7 @@ func (c *Client) GetOrders(openOnly bool) (OrdersResponse, error) {
 	var resp OrdersResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return OrdersResponse{}, fmt.Errorf("failed to fetch /v1/orders: %w", sendErr)
+		return OrdersResponse{}, fmt.Errorf("failed to fetch /v1/orders code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 
 	if !resp.Success {
@@ -79,10 +79,10 @@ func (c *Client) GetAlgoOrders(openOnly bool) (AlgoOrdersResponse, error) {
 	var resp AlgoOrdersResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return AlgoOrdersResponse{}, fmt.Errorf("failed to fetch /v1/algo/orders: %w", sendErr)
+		return AlgoOrdersResponse{}, fmt.Errorf("failed to fetch /v1/algo/orders code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
-		return AlgoOrdersResponse{}, fmt.Errorf("orderly /v1/algo/orders returned success=false")
+		return AlgoOrdersResponse{}, fmt.Errorf("orderly /v1/algo/orders returned success=false code=%d message=%s", resp.Code, resp.Message)
 	}
 
 	return resp, nil
@@ -109,7 +109,7 @@ func (c *Client) CreateOrder(order CreateOrderRequest) (CreateOrderResponse, err
 	var resp CreateOrderResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CreateOrderResponse{}, fmt.Errorf("failed to create /v1/order: %w", sendErr)
+		return CreateOrderResponse{}, fmt.Errorf("failed to create /v1/order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -139,7 +139,7 @@ func (c *Client) BatchCreateOrder(batch BatchCreateOrderRequest) (BatchCreateOrd
 	var resp BatchCreateOrderResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return BatchCreateOrderResponse{}, fmt.Errorf("failed to create /v1/batch-order: %w", sendErr)
+		return BatchCreateOrderResponse{}, fmt.Errorf("failed to create /v1/batch-order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/batch-order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -169,7 +169,7 @@ func (c *Client) CreateAlgoOrder(order CreateAlgoOrderRequest) (CreateAlgoOrderR
 	var resp CreateAlgoOrderResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CreateAlgoOrderResponse{}, fmt.Errorf("failed to create /v1/algo/order: %w", sendErr)
+		return CreateAlgoOrderResponse{}, fmt.Errorf("failed to create /v1/algo/order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/algo/order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -203,7 +203,7 @@ func (c *Client) CancelOrder(orderID string, symbol string) (CancelResponse, err
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/order: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -237,7 +237,7 @@ func (c *Client) CancelOrderByClientID(clientOrderID string, symbol string) (Can
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/client/order: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/client/order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/client/order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -271,7 +271,7 @@ func (c *Client) CancelAlgoOrder(orderID string, symbol string) (CancelResponse,
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/algo/order: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/algo/order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/algo/order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -305,7 +305,7 @@ func (c *Client) CancelAlgoOrderByClientID(clientOrderID string, symbol string) 
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/algo/client/order: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/algo/client/order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/algo/client/order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -340,7 +340,7 @@ func (c *Client) CancelAllPendingOrders(symbol string) (CancelResponse, error) {
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/orders: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/orders code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/orders returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -375,7 +375,7 @@ func (c *Client) CancelAllPendingAlgoOrders(symbol string) (CancelResponse, erro
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/algo/orders: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/algo/orders code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/algo/orders returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -408,7 +408,7 @@ func (c *Client) BatchCancelOrders(orderIDs []string) (CancelResponse, error) {
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/batch-order: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/batch-order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/batch-order returned success=false code=%d message=%s", resp.Code, resp.Message)
@@ -441,7 +441,7 @@ func (c *Client) BatchCancelOrdersByClientID(clientOrderIDs []string) (CancelRes
 	var resp CancelResponse
 	_, sendErr := c.requester.Send(req, &resp)
 	if sendErr != nil {
-		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/client/batch-order: %w", sendErr)
+		return CancelResponse{}, fmt.Errorf("failed to cancel /v1/client/batch-order code=%d message=%s: %w", resp.Code, resp.Message, sendErr)
 	}
 	if !resp.Success {
 		return resp, fmt.Errorf("orderly /v1/client/batch-order returned success=false code=%d message=%s", resp.Code, resp.Message)

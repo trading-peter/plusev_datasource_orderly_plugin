@@ -58,11 +58,11 @@ func (c *Client) GetRecentOHLCV(params exchange.GetOHLCVParams) ([]tt.OHLCVRecor
 			"error":    err.Error(),
 			"endpoint": endpoint,
 		})
-		return nil, fmt.Errorf("failed to fetch recent OHLCV data from Orderly: %w", err)
+		return nil, fmt.Errorf("failed to fetch recent OHLCV data from Orderly code=%d message=%s: %w", response.Code, response.Message, err)
 	}
 
 	if !response.Success {
-		return nil, fmt.Errorf("Orderly API returned success=false")
+		return nil, fmt.Errorf("Orderly API returned success=false code=%d message=%s", response.Code, response.Message)
 	}
 
 	// Convert Orderly format to our OHLCV format

@@ -19,10 +19,10 @@ func (c *Client) GetClientInfo() (ClientInfoResponse, error) {
 	var resp ClientInfoResponse
 	_, err := c.requester.Send(req, &resp)
 	if err != nil {
-		return ClientInfoResponse{}, fmt.Errorf("failed to fetch /v1/client/info: %w", err)
+		return ClientInfoResponse{}, fmt.Errorf("failed to fetch /v1/client/info code=%d message=%s: %w", resp.Code, resp.Message, err)
 	}
 	if !resp.Success {
-		return ClientInfoResponse{}, fmt.Errorf("orderly /v1/client/info returned success=false")
+		return ClientInfoResponse{}, fmt.Errorf("orderly /v1/client/info returned success=false code=%d message=%s", resp.Code, resp.Message)
 	}
 	return resp, nil
 }

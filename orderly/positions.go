@@ -19,10 +19,10 @@ func (c *Client) GetAllPositions() (PositionsResponse, error) {
 	var resp PositionsResponse
 	_, err := c.requester.Send(req, &resp)
 	if err != nil {
-		return PositionsResponse{}, fmt.Errorf("failed to fetch /v1/positions: %w", err)
+		return PositionsResponse{}, fmt.Errorf("failed to fetch /v1/positions code=%d message=%s: %w", resp.Code, resp.Message, err)
 	}
 	if !resp.Success {
-		return PositionsResponse{}, fmt.Errorf("orderly /v1/positions returned success=false")
+		return PositionsResponse{}, fmt.Errorf("orderly /v1/positions returned success=false code=%d message=%s", resp.Code, resp.Message)
 	}
 	return resp, nil
 }
