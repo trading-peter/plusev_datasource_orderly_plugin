@@ -56,7 +56,7 @@ func (p *OrderlyPlugin) GetMeta() m.Meta {
 		Category:    "dex",
 		Description: "Orderly Network data source - perpetual futures markets",
 		Author:      "trading_peter",
-		Version:     "v1.0.0",
+		Version:     "v1.2.0",
 		Repository:  "https://github.com/trading-peter/plusev_datasource_orderly_plugin",
 		Tags:        []string{"orderly", "crypto", "exchange", "perpetual", "futures"},
 		Contacts: []m.AuthorContact{
