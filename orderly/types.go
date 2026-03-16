@@ -131,7 +131,7 @@ type PositionRow struct {
 	UnsettledPnl          float64 `json:"unsettled_pnl"`
 	Pnl24H                float64 `json:"pnl_24_h"`
 	Fee24H                float64 `json:"fee_24_h"`
-	Leverage              string  `json:"leverage"`
+	Leverage              int64   `json:"leverage"`
 	CostPosition          float64 `json:"cost_position"`
 	SettlePrice           float64 `json:"settle_price"`
 	PendingLongQty        float64 `json:"pending_long_qty"`

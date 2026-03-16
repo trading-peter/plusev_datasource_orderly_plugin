@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
@@ -53,14 +51,6 @@ func (p *OrderlyPlugin) handleGetPositions(params map[string]any) plugin.Respons
 			side = "short"
 		}
 
-		lev := 0
-		levStr := strings.TrimSpace(row.Leverage)
-		if levStr != "" {
-			if f, err := strconv.ParseFloat(levStr, 64); err == nil {
-				lev = int(f)
-			}
-		}
-
 		estPnL := ""
 		if row.PositionQty != 0 && row.MarkPrice != 0 && row.AverageOpenPrice != 0 {
 			estPnL = fmt.Sprintf("%.15g", (row.MarkPrice-row.AverageOpenPrice)*row.PositionQty)
@@ -75,7 +65,7 @@ func (p *OrderlyPlugin) handleGetPositions(params map[string]any) plugin.Respons
 			UnrealizedPnL:    estPnL,
 			UnsettledPnL:     fmt.Sprintf("%.15g", row.UnsettledPnl),
 			LiquidationPrice: fmt.Sprintf("%.15g", row.EstLiqPrice),
-			Leverage:         lev,
+			Leverage:         int(row.Leverage),
 			IsIsolated:       false,
 			Components: map[string]string{
 				"pnl_24h":                  fmt.Sprintf("%.15g", row.Pnl24H),
