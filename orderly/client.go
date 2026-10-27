@@ -24,13 +24,10 @@ type Client struct {
 	isTestnet bool
 }
 
-// NewClient creates a new Orderly API client
-func NewClient(req rt.RequestDoer, baseURL string, isTestnet bool) *Client {
-	wsBaseURL := "wss://ws-evm.orderly.org"
-	if isTestnet {
-		wsBaseURL = "wss://testnet-ws-evm.orderly.org"
-	}
-
+// NewClient creates a new Orderly API client. The resolved REST and WS
+// base URLs come from the plugin config (ORD-701) — every REST call and
+// the {wsBaseURL}/ws/stream/{accountID} endpoint respect them.
+func NewClient(req rt.RequestDoer, baseURL, wsBaseURL string, isTestnet bool) *Client {
 	return &Client{
 		name:      "Orderly Network",
 		baseURL:   baseURL,
@@ -111,6 +108,24 @@ func (c *Client) GetConfigFields() []plugin.ConfigField {
 			Required:    false,
 			Type:        "boolean",
 			Default:     false,
+		},
+		{
+			Label:       "Base URL",
+			Name:        "baseUrl",
+			Description: "Overrides the REST host (e.g. a sandbox dialect mount). Leave empty for the default — testnet picks the testnet host.",
+			Required:    false,
+			Encrypt:     false,
+			Mask:        false,
+			Placeholder: "https://api.orderly.org",
+		},
+		{
+			Label:       "WebSocket URL",
+			Name:        "wsUrl",
+			Description: "Overrides the WebSocket host (e.g. ws://127.0.0.1:8080). Leave empty for the default — testnet picks the testnet host.",
+			Required:    false,
+			Encrypt:     false,
+			Mask:        false,
+			Placeholder: "wss://ws-evm.orderly.org",
 		},
 	}
 }

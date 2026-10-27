@@ -10,6 +10,7 @@ import (
 	"github.com/plusev-terminal/go-plugin-common/plugin"
 	"github.com/plusev-terminal/go-plugin-common/requester"
 	"github.com/trading-peter/plusev_datasource_orderly_plugin/orderly"
+	"github.com/trading-peter/plusev_datasource_orderly_plugin/urls"
 )
 
 // ============================================================================
@@ -47,16 +48,19 @@ type OrderlyPlugin struct {
 	client *orderly.Client
 }
 
-// GetMeta returns the plugin metadata
+// GetMeta returns the plugin metadata. The version suffix and the
+// AllowedNetworkTargets are build-time variants: `dev` builds add
+// loopback targets for the Exchange Sandbox dialect (ORD-701), release
+// builds keep the production hosts only.
 func (p *OrderlyPlugin) GetMeta() m.Meta {
 	return m.Meta{
 		PluginID:    "orderly-datasource",
-		Name:        "Orderly Network",
+		Name:        "Orderly Network" + buildVariantName,
 		AppID:       "datasrc",
 		Category:    "dex",
 		Description: "Orderly Network data source - perpetual futures markets",
 		Author:      "trading_peter",
-		Version:     "v1.2.1",
+		Version:     "v1.2.1" + buildVariantVersion,
 		Repository:  "https://github.com/trading-peter/plusev_datasource_orderly_plugin",
 		Tags:        []string{"orderly", "crypto", "exchange", "perpetual", "futures"},
 		Contacts: []m.AuthorContact{
@@ -66,12 +70,7 @@ func (p *OrderlyPlugin) GetMeta() m.Meta {
 			},
 		},
 		Resources: m.ResourceAccess{
-			AllowedNetworkTargets: []m.NetworkTargetRule{
-				{Pattern: "https://api.orderly.org/*"},
-				{Pattern: "https://testnet-api.orderly.org/*"},
-				{Pattern: "wss://ws-evm.orderly.org/*"},
-				{Pattern: "wss://testnet-ws-evm.orderly.org/*"},
-			},
+			AllowedNetworkTargets: networkTargets(),
 		},
 		// Features will be auto-populated with registered commands
 		Features: []string{},
@@ -121,7 +120,7 @@ func (p *OrderlyPlugin) GetRateLimits() []plugin.RateLimit {
 func (p *OrderlyPlugin) GetConfigFields() []plugin.ConfigField {
 	// Initialize client if needed to get config fields
 	if p.client == nil {
-		p.client = orderly.NewClient(requester.NewRequester(), "https://api.orderly.org", false)
+		p.client = orderly.NewClient(requester.NewRequester(), urls.DefaultBaseURL, urls.DefaultWSBaseURL, false)
 	}
 	return p.client.GetConfigFields()
 }
@@ -130,15 +129,13 @@ func (p *OrderlyPlugin) GetConfigFields() []plugin.ConfigField {
 func (p *OrderlyPlugin) OnInit(config *plugin.ConfigStore) error {
 	p.config = config
 
-	// Determine if testnet should be used
+	// Resolve the hosts: explicit baseUrl/wsUrl win, then the testnet
+	// toggle, then production (ORD-701).
 	isTestnet := config.GetBool("testnet")
-	baseURL := "https://api.orderly.org"
-	if isTestnet {
-		baseURL = "https://testnet-api.orderly.org"
-	}
+	baseURL, wsURL := urls.ResolveURLs(config.GetString("baseUrl"), config.GetString("wsUrl"), isTestnet)
 
 	// Create Orderly client
-	p.client = orderly.NewClient(requester.NewRequester(), baseURL, isTestnet)
+	p.client = orderly.NewClient(requester.NewRequester(), baseURL, wsURL, isTestnet)
 
 	// Set credentials on the client
 	credentials := make(map[string]string)
