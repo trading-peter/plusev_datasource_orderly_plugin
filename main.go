@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
 	"github.com/plusev-terminal/go-plugin-common/logging"
@@ -77,43 +76,12 @@ func (p *OrderlyPlugin) GetMeta() m.Meta {
 	}
 }
 
+// GetRateLimits returns an empty slice on purpose: Orderly's real budgets
+// are declared as manifest Limits on the network targets (network.go), and
+// keeping the legacy per-command limiter would double-throttle the same
+// requests.
 func (p *OrderlyPlugin) GetRateLimits() []plugin.RateLimit {
-	// Define rate limits based on Orderly API documentation
-	return []plugin.RateLimit{
-		// Public endpoints
-		{
-			Command: ex.CMD_GET_MARKETS, // GET /v1/public/info
-			Scope:   []plugin.RateLimitScope{plugin.RateLimitScopeIP},
-			RPS:     10.0, // Conservative rate limit
-			Burst:   10,
-		},
-		{
-			Command: ex.CMD_GET_TIMEFRAMES, // Static data, no API call
-			Scope:   []plugin.RateLimitScope{plugin.RateLimitScopeIP},
-			RPS:     10.0,
-			Burst:   10,
-		},
-		// Private endpoints (require authentication)
-		{
-			Command: ex.CMD_GET_OHLCV, // GET /v1/tv/kline_history
-			Scope:   []plugin.RateLimitScope{plugin.RateLimitScopeAPIKey},
-			RPS:     plugin.CalculateRPS(5, 10*time.Second), // 5 requests per 10 seconds as per API docs
-			Burst:   1,
-		},
-		{
-			Command: ex.CMD_CREATE_ORDERS, // POST /v1/order or /v1/batch-order or /v1/algo/order
-			Scope:   []plugin.RateLimitScope{plugin.RateLimitScopeAPIKey},
-			RPS:     1.0, // Conservative (batch create limit is 1 rps)
-			Burst:   2,
-		},
-		// WebSocket streams
-		{
-			Command: ex.CMD_OHLCV_STREAM,
-			Scope:   []plugin.RateLimitScope{plugin.RateLimitScopeAPIKey},
-			RPS:     1.0, // Connection setup rate
-			Burst:   5,   // Allow some burst for reconnections
-		},
-	}
+	return []plugin.RateLimit{}
 }
 
 // GetConfigFields returns the configuration fields needed by this plugin
