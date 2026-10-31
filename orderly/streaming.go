@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/plusev-terminal/go-plugin-common/plugin"
-	tt "github.com/plusev-terminal/go-plugin-common/trading"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
+	tt "github.com/plusev-terminal/go-plugin-common/v2/trading"
 )
 
 // PrepareStream prepares streaming connection setup

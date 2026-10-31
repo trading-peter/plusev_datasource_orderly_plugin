@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
-	"github.com/plusev-terminal/go-plugin-common/plugin"
+	ex "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
 )
 
 // handleGetRecentOHLCV returns recent OHLCV data which is capped less history and doesn't support start/end time.

@@ -2,7 +2,7 @@
 
 package main
 
-import m "github.com/plusev-terminal/go-plugin-common/meta"
+import m "github.com/plusev-terminal/go-plugin-common/v2/meta"
 
 // Dev builds (go build -tags dev): marked in the plugin list and allowed
 // to reach the Exchange Sandbox dialect on the loopback (ORD-701).

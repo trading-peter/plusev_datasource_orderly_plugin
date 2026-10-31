@@ -2,7 +2,7 @@
 
 package main
 
-import m "github.com/plusev-terminal/go-plugin-common/meta"
+import m "github.com/plusev-terminal/go-plugin-common/v2/meta"
 
 // Release builds: production ACL only, no name/version marker.
 const (

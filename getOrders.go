@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
-	acct "github.com/plusev-terminal/go-plugin-common/datasrc/exchange/account"
-	"github.com/plusev-terminal/go-plugin-common/plugin"
+	ex "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange"
+	acct "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange/account"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
 	"github.com/trading-peter/plusev_datasource_orderly_plugin/orderly"
 )
 
@@ -91,6 +91,19 @@ func normalizeOrderlyStatus(status string) acct.OrderStatus {
 		return acct.OrderStatusUnknown
 	default:
 		return acct.OrderStatus(strings.ToLower(s))
+	}
+}
+
+// normalizeOrderlyTriggerSource maps Orderly's trigger_price_type onto the
+// contract's TriggerSource; empty stays empty (venue default).
+func normalizeOrderlyTriggerSource(t string) acct.TriggerSource {
+	switch strings.ToUpper(strings.TrimSpace(t)) {
+	case "MARK_PRICE":
+		return acct.TriggerSourceMark
+	case "LAST_PRICE":
+		return acct.TriggerSourceLast
+	default:
+		return ""
 	}
 }
 
@@ -203,10 +216,10 @@ func (p *OrderlyPlugin) handleGetOrders(params map[string]any) plugin.Response {
 				ExecutedQuantity:  fmt.Sprintf("%.15g", executed),
 				RemainingQuantity: fmt.Sprintf("%.15g", remaining),
 				ReduceOnly:        a.ReduceOnly,
+				TriggerPrice:      fmt.Sprintf("%.15g", a.TriggerPrice),
+				TriggerSource:     normalizeOrderlyTriggerSource(a.TriggerPriceType),
 				Components: map[string]string{
-					"trigger_price":           fmt.Sprintf("%.15g", a.TriggerPrice),
 					"trigger_status":          a.TriggerStatus,
-					"trigger_price_type":      a.TriggerPriceType,
 					"trigger_time":            fmt.Sprintf("%d", a.TriggerTime),
 					"average_executed_price":  fmt.Sprintf("%.15g", a.AverageExecutedPrice),
 					"total_fee":               fmt.Sprintf("%.15g", a.TotalFee),

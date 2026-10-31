@@ -3,9 +3,9 @@ package main
 import (
 	"strings"
 
-	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
-	"github.com/plusev-terminal/go-plugin-common/plugin"
-	commonstream "github.com/plusev-terminal/go-plugin-common/stream"
+	ex "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
+	commonstream "github.com/plusev-terminal/go-plugin-common/v2/stream"
 )
 
 // handleOHLCVStream sets up a WebSocket stream for OHLCV data
@@ -14,7 +14,7 @@ func (p *OrderlyPlugin) handleOHLCVStream(params map[string]any) plugin.Response
 	if strings.TrimSpace(streamParams.Market.Symbol) == "" {
 		return plugin.ErrorResponseMsg("market.symbol is required")
 	}
-	assetType := strings.TrimSpace(streamParams.Market.AssetType)
+	assetType := strings.TrimSpace(string(streamParams.Market.AssetType))
 
 	streamReq := plugin.StreamSetupRequest{
 		StreamID:   "orderly_ohlcv_" + streamParams.Market.Symbol + "_" + streamParams.Timeframe,

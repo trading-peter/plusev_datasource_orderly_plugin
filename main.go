@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
-	"github.com/plusev-terminal/go-plugin-common/logging"
-	m "github.com/plusev-terminal/go-plugin-common/meta"
-	"github.com/plusev-terminal/go-plugin-common/plugin"
-	"github.com/plusev-terminal/go-plugin-common/requester"
+	ex "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange"
+	"github.com/plusev-terminal/go-plugin-common/v2/logging"
+	m "github.com/plusev-terminal/go-plugin-common/v2/meta"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
+	"github.com/plusev-terminal/go-plugin-common/v2/requester"
 	"github.com/trading-peter/plusev_datasource_orderly_plugin/orderly"
 	"github.com/trading-peter/plusev_datasource_orderly_plugin/urls"
 )

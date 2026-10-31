@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	rt "github.com/plusev-terminal/go-plugin-common/requester/types"
+	rt "github.com/plusev-terminal/go-plugin-common/v2/requester/types"
 )
 
 // GetOrders fetches orders for the configured account.

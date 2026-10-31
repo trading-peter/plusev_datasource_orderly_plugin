@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	m "github.com/plusev-terminal/go-plugin-common/meta"
+	m "github.com/plusev-terminal/go-plugin-common/v2/meta"
 )
 
 // wantRules pins the manifest rules table to Orderly's published budgets

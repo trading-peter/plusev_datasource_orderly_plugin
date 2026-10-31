@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	rt "github.com/plusev-terminal/go-plugin-common/requester/types"
-	tt "github.com/plusev-terminal/go-plugin-common/trading"
+	rt "github.com/plusev-terminal/go-plugin-common/v2/requester/types"
+	tt "github.com/plusev-terminal/go-plugin-common/v2/trading"
 )
 
 // GetMarkets returns all available trading markets from Orderly
@@ -39,7 +39,7 @@ func (c *Client) GetMarkets() ([]tt.Market, error) {
 		}
 
 		// Assume all Orderly markets are perpetual futures for now
-		assetType := "perpetual"
+		var assetType tt.AssetType = tt.AssetTypePerpetual
 		base := parts[1]  // BTC
 		quote := parts[2] // USDC
 

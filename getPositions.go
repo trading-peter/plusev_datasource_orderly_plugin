@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
-	acct "github.com/plusev-terminal/go-plugin-common/datasrc/exchange/account"
-	"github.com/plusev-terminal/go-plugin-common/plugin"
+	ex "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange"
+	acct "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange/account"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
 )
 
 func (p *OrderlyPlugin) handleGetPositions(params map[string]any) plugin.Response {

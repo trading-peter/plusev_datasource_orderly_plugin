@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	m "github.com/plusev-terminal/go-plugin-common/meta"
+	m "github.com/plusev-terminal/go-plugin-common/v2/meta"
 )
 
 // Manifest rate limits for the Orderly REST hosts (api.orderly.org and

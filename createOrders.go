@@ -7,9 +7,9 @@ import (
 	"time"
 	"unicode"
 
-	ex "github.com/plusev-terminal/go-plugin-common/datasrc/exchange"
-	acct "github.com/plusev-terminal/go-plugin-common/datasrc/exchange/account"
-	"github.com/plusev-terminal/go-plugin-common/plugin"
+	ex "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange"
+	acct "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange/account"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
 	"github.com/trading-peter/plusev_datasource_orderly_plugin/orderly"
 )
 
@@ -249,7 +249,7 @@ func isAlgoOrder(order ex.CreateOrderParams) bool {
 		return true
 	}
 
-	if order.TriggerPrice != "" || order.StopPrice != "" || order.TakeProfitPrice != "" || order.TrailingDelta != "" || order.ActivationPrice != "" {
+	if order.TriggerPrice != "" || order.StopPrice != "" || order.TakeProfitPrice != "" || order.TrailingAmount != "" || order.TrailingPercent != "" || order.ActivationPrice != "" {
 		return true
 	}
 
@@ -529,8 +529,12 @@ func buildTrailingStopOrder(symbol string, order ex.CreateOrderParams) (orderly.
 		req.CallbackValue = v
 	}
 
-	if req.CallbackRate == "" && req.CallbackValue == "" && strings.TrimSpace(order.TrailingDelta) != "" {
-		req.CallbackValue = strings.TrimSpace(order.TrailingDelta)
+	if req.CallbackRate == "" && req.CallbackValue == "" && strings.TrimSpace(order.TrailingPercent) != "" {
+		req.CallbackValue = strings.TrimSpace(order.TrailingPercent)
+	}
+
+	if strings.TrimSpace(order.TrailingAmount) != "" {
+		return orderly.CreateAlgoOrderRequest{}, fmt.Errorf("orderly trailing stops are percentage-based: use trailingPercent, not trailingAmount")
 	}
 
 	if strings.TrimSpace(order.ActivationPrice) != "" {
@@ -863,7 +867,7 @@ func isTrailingStop(order ex.CreateOrderParams) bool {
 		return true
 	}
 
-	if strings.TrimSpace(order.TrailingDelta) != "" || strings.TrimSpace(order.ActivationPrice) != "" {
+	if strings.TrimSpace(order.TrailingPercent) != "" || strings.TrimSpace(order.ActivationPrice) != "" {
 		return true
 	}
 

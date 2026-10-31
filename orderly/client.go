@@ -4,9 +4,9 @@ import (
 	"crypto/ed25519"
 	"strings"
 
-	"github.com/plusev-terminal/go-plugin-common/logging"
-	"github.com/plusev-terminal/go-plugin-common/plugin"
-	rt "github.com/plusev-terminal/go-plugin-common/requester/types"
+	"github.com/plusev-terminal/go-plugin-common/v2/logging"
+	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
+	rt "github.com/plusev-terminal/go-plugin-common/v2/requester/types"
 
 	"github.com/mr-tron/base58"
 )
