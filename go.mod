@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/mr-tron/base58 v1.2.0
-	github.com/plusev-terminal/go-plugin-common/v2 v2.0.0
+	github.com/plusev-terminal/go-plugin-common/v2 v2.0.1
 )
 
 require (
