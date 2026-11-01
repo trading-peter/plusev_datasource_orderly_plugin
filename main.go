@@ -4,10 +4,12 @@ import (
 	"fmt"
 
 	ex "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange"
+	acct "github.com/plusev-terminal/go-plugin-common/v2/datasrc/exchange/account"
 	"github.com/plusev-terminal/go-plugin-common/v2/logging"
 	m "github.com/plusev-terminal/go-plugin-common/v2/meta"
 	"github.com/plusev-terminal/go-plugin-common/v2/plugin"
 	"github.com/plusev-terminal/go-plugin-common/v2/requester"
+	tt "github.com/plusev-terminal/go-plugin-common/v2/trading"
 	"github.com/trading-peter/plusev_datasource_orderly_plugin/orderly"
 	"github.com/trading-peter/plusev_datasource_orderly_plugin/urls"
 )
@@ -83,6 +85,64 @@ func (p *OrderlyPlugin) GetMeta() m.Meta {
 func (p *OrderlyPlugin) GetRateLimits() []plugin.RateLimit {
 	return []plugin.RateLimit{}
 }
+
+// GetOrderCapabilities declares the order features this plugin really serves;
+// the host checks every createOrders batch against it before dispatch
+// (wasm export get_order_capabilities). It must mirror the create switch in
+// createOrders.go exactly — an undeclared feature is rejected with a clear
+// error, and a declared-but-ignored field would silently place a partial
+// order.
+//
+// Not declared on purpose:
+//   - TimeInForceGTD: Orderly's order/algo create bodies carry no expiry, so
+//     ExpireTime cannot be sent.
+//   - TrailingAmount: Orderly trailing stops are percentage-based only
+//     (callbackRate/callbackValue).
+//   - PositionSide / CancelGroupOnFailure: never read by the create path.
+func (p *OrderlyPlugin) GetOrderCapabilities() ex.OrderCapabilities {
+	return ex.OrderCapabilities{
+		// Orderly publishes perpetual markets only (orderly/markets.go).
+		AssetTypes: []tt.AssetType{tt.AssetTypePerpetual},
+		OrderTypes: []acct.OrderType{
+			acct.OrderTypeLimit, acct.OrderTypeMarket,
+			acct.OrderTypeStop, acct.OrderTypeStopLimit, acct.OrderTypeStopMarket,
+			acct.OrderTypeTakeProfit, acct.OrderTypeTakeProfitLimit, acct.OrderTypeTakeProfitMarket,
+			acct.OrderTypeTrailingStop,
+		},
+		TimeInForce: []acct.TimeInForce{
+			acct.TimeInForceGTC, acct.TimeInForceIOC, acct.TimeInForceFOK,
+			acct.TimeInForcePostOnly, acct.TimeInForceGTX,
+		},
+		// Orderly trigger_price_type serves MARK_PRICE and LAST_PRICE; the
+		// venue default (and this plugin's fallback) is the mark price.
+		TriggerSources:       []acct.TriggerSource{acct.TriggerSourceMark, acct.TriggerSourceLast},
+		DefaultTriggerSource: acct.TriggerSourceMark,
+
+		TrailingPercent: true,
+		ActivationPrice: true,
+		ReduceOnly:      true,
+		PostOnly:        true,
+		ClosePosition:   true,
+		QuoteQuantity:   true,
+		ClientOrderID:   true,
+
+		// Extra keys the create switch reads (createOrders.go); anything else
+		// is rejected by the host. Both spellings are honored.
+		ExtraKeys: []string{
+			"visibleQuantity", "visible_quantity",
+			"slippage",
+			"level",
+			"postOnlyAdjust", "post_only_adjust",
+			"callbackRate",
+			"callbackValue",
+			"orderTag",
+		},
+	}
+}
+
+// The host reads the declaration through the plugin.OrderCapabilityProvider
+// export; keep the wiring compiling.
+var _ plugin.OrderCapabilityProvider = (*OrderlyPlugin)(nil)
 
 // GetConfigFields returns the configuration fields needed by this plugin
 func (p *OrderlyPlugin) GetConfigFields() []plugin.ConfigField {

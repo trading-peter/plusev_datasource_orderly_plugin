@@ -387,11 +387,7 @@ func buildStopAlgoOrder(symbol string, order ex.CreateOrderParams) (orderly.Crea
 		return orderly.CreateAlgoOrderRequest{}, fmt.Errorf("invalid trigger price: %w", err)
 	}
 
-	triggerType := pickTriggerPriceType(order)
-
-	if triggerType != "" {
-		req.TriggerPriceType = triggerType
-	}
+	req.TriggerPriceType = pickTriggerPriceType(order)
 
 	req.TriggerPrice = &triggerValue
 
@@ -430,7 +426,7 @@ func buildTpSlOrder(symbol string, order ex.CreateOrderParams) (orderly.CreateAl
 		AlgoType:         "TP_SL",
 		ClientOrderID:    order.ClientOrderID,
 		OrderTag:         pickOrderTag(order),
-		TriggerPriceType: "MARK_PRICE",
+		TriggerPriceType: pickTriggerPriceType(order),
 	}
 
 	if qty := strings.TrimSpace(order.Quantity); qty != "" {
@@ -470,7 +466,7 @@ func buildPositionalTpSl(symbol string, order ex.CreateOrderParams) (orderly.Cre
 		AlgoType:         "POSITIONAL_TP_SL",
 		ClientOrderID:    order.ClientOrderID,
 		OrderTag:         pickOrderTag(order),
-		TriggerPriceType: "MARK_PRICE",
+		TriggerPriceType: pickTriggerPriceType(order),
 	}
 
 	childOrders := make([]orderly.CreateAlgoOrderRequest, 0, 2)
@@ -616,7 +612,7 @@ func buildBracketAlgoOrder(groupID string, items []indexedOrder) (orderly.Create
 	positional := orderly.CreateAlgoOrderRequest{
 		Symbol:           symbol,
 		AlgoType:         "POSITIONAL_TP_SL",
-		TriggerPriceType: "MARK_PRICE",
+		TriggerPriceType: pickTriggerPriceType(entry.order),
 		ChildOrders:      []orderly.CreateAlgoOrderRequest{},
 	}
 
@@ -772,8 +768,11 @@ func requiresPrice(orderType string) bool {
 	}
 }
 
+// requiresStopLimit reports whether a conditional order places as an Orderly
+// STOP algo with a limit price attached (type LIMIT) rather than a market
+// trigger (type MARKET).
 func requiresStopLimit(order ex.CreateOrderParams) bool {
-	return order.Type == acct.OrderTypeStopLimit
+	return order.Type == acct.OrderTypeStopLimit || order.Type == acct.OrderTypeTakeProfitLimit
 }
 
 func getOrderSymbol(order ex.CreateOrderParams) string {
@@ -851,9 +850,12 @@ func pickTriggerPrice(order ex.CreateOrderParams) string {
 	return ""
 }
 
+// pickTriggerPriceType resolves Orderly's trigger_price_type from the
+// first-class TriggerSource. Orderly serves the mark and last price only
+// (orderly/types.go); mark and the empty venue default are the same.
 func pickTriggerPriceType(order ex.CreateOrderParams) string {
-	if v, ok := extraString(order.Extra, "triggerPriceType", "trigger_price_type"); ok {
-		return strings.ToUpper(strings.TrimSpace(v))
+	if order.TriggerSource == acct.TriggerSourceLast {
+		return "LAST_PRICE"
 	}
 	return "MARK_PRICE"
 }
